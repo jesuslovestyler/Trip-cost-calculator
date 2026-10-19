@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>Trip Cost Calculator</title>
+    <style>
+      :root {
+        --bg: #f4f6f1;
+        --surface: #ffffff;
+        --surface-soft: #eef3ea;
+        --ink: #1d2b22;
+        --ink-soft: #43544a;
+        --line: #d5ded1;
+        --accent: #1e6b4a;
+        --accent-ink: #ffffff;
+        --accent-soft: #e3efe6;
+        --amber: #b97c16;
+        --focus: #14532d;
+        --shadow: 0 2px 14px rgba(29, 43, 34, 0.08);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #121814;
+          --surface: #1b241e;
+          --surface-soft: #232e27;
+          --ink: #e8efe9;
+          --ink-soft: #a9bcae;
+          --line: #334539;
+          --accent: #4cc38a;
+          --accent-ink: #0c1a12;
+          --accent-soft: #23382c;
+          --amber: #e0a83c;
+          --focus: #8fe0b4;
+          --shadow: 0 2px 14px rgba(0, 0, 0, 0.35);
+        }
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: var(--bg);
+        color: var(--ink);
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        line-height: 1.5;
+        -webkit-text-size-adjust: 100%;
+      }
+      .wrap {
+        max-width: 620px;
+        margin: 0 auto;
+        padding: 20px 18px 40px;
+      }
+      .home-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 44px;
+        padding: 8px 18px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: var(--surface);
+        color: var(--ink);
+        font-size: 15px;
+        font-weight: 600;
+        text-decoration: none;
+        box-shadow: var(--shadow);
+      }
+      .home-pill:active { background: var(--surface-soft); }
+      header { margin: 26px 0 18px; }
+      h1 {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 34px;
+        line-height: 1.15;
+        margin: 0 0 8px;
+        font-weight: 700;
+      }
+      .intro {
+        margin: 0;
+        font-size: 17px;
+        color: var(--ink-soft);
+        max-width: 44ch;
+      }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        box-shadow: var(--shadow);
+        padding: 22px 20px;
+        margin-top: 20px;
+      }
+      .field { margin-bottom: 22px; }
+      .field:last-child { margin-bottom: 0; }
+      label.field-label {
+        display: block;
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+      .sub {
+        font-size: 13.5px;
+        color: var(--ink-soft);
+        font-weight: 400;
+      }
+      .input-row {
+        display: flex;
+        align-items: stretch;
+        gap: 0;
+        border: 1.5px solid var(--line);
+        border-radius: 10px;
+        overflow: hidden;
+        background: var(--surface);
+      }
+      .input-row:focus-within { border-color: var(--accent); }
+      .prefix, .suffix {
+        display: flex;
+        align-items: center;
+        padding: 0 12px;
+        font-size: 17px;
+        font-weight: 600;
+        color: var(--ink-soft);
+        background: var(--surface-soft);
+        white-space: nowrap;
+      }
+      input[type="number"] {
+        flex: 1;
+        min-width: 0;
+        border: 0;
+        outline: none;
+        background: transparent;
+        color: var(--ink);
+        font-size: 20px;
+        font-weight: 600;
+        padding: 14px 12px;
+        min-height: 56px;
+        -moz-appearance: textfield;
+        appearance: textfield;
+      }
+      input[type="number"]::-webkit-outer-spin-button,
+      input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+      input[type="number"]::placeholder { color: var(--ink-soft); opacity: 0.65; font-weight: 400; }
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+      }
+      .chip {
+        min-height: 48px;
+        padding: 10px 18px;
+        border-radius: 999px;
+        border: 1.5px solid var(--line);
+        background: var(--surface-soft);
+        color: var(--ink);
+        font-size: 15.5px;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+      }
+      .chip.active {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: var(--accent-ink);
+      }
+      .toggle-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 4px 0;
+      }
+      .toggle-text .t-title { font-size: 16px; font-weight: 700; display: block; }
+      .toggle-text .t-sub { font-size: 13.5px; color: var(--ink-soft); }
+      .switch {
+        position: relative;
+        flex: 0 0 auto;
+        width: 68px;
+        height: 44px;
+      }
+      .switch input {
+        -webkit-appearance: none;
+        appearance: none;
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        border-radius: 999px;
+        background: var(--line);
+        cursor: pointer;
+        transition: background 0.15s ease;
+      }
+      .switch input::after {
+        content: "";
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: #ffffff;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+        transition: transform 0.15s ease;
+      }
+      .switch input:checked { background: var(--accent); }
+      .switch input:checked::after { transform: translateX(24px); }
+      .switch input:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+      .results { margin-top: 22px; }
+      .total-block {
+        background: var(--accent-soft);
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+      }
+      .total-label {
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--ink-soft);
+        margin: 0 0 4px;
+      }
+      .total-value {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 52px;
+        line-height: 1.05;
+        font-weight: 700;
+        margin: 0;
+      }
+      .total-note {
+        margin: 6px 0 0;
+        font-size: 14px;
+        color: var(--ink-soft);
+        min-height: 1.2em;
+      }
+      .stat-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-top: 12px;
+      }
+      .stat {
+        background: var(--surface-soft);
+        border-radius: 12px;
+        padding: 14px 16px;
+      }
+      .stat .s-label {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--ink-soft);
+        margin: 0 0 2px;
+      }
+      .stat .s-value {
+        font-size: 24px;
+        font-weight: 700;
+        margin: 0;
+      }
+      .stat .s-note {
+        font-size: 13px;
+        color: var(--ink-soft);
+        margin: 2px 0 0;
+      }
+      .hint {
+        margin-top: 14px;
+        padding: 12px 16px;
+        border-radius: 10px;
+        background: var(--surface-soft);
+        color: var(--ink);
+        font-size: 15px;
+        display: none;
+      }
+      .hint.show { display: block; }
+      .footnote {
+        margin: 22px 4px 0;
+        font-size: 13.5px;
+        color: var(--ink-soft);
+        text-align: center;
+      }
+      @media (max-width: 420px) {
+        h1 { font-size: 30px; }
+        .total-value { font-size: 44px; }
+        .stat-grid { grid-template-columns: 1fr 1fr; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .switch input, .switch input::after { transition: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <a class="home-pill" href="https://jesuslovestyler.com/">⌂ Home</a>
+
+      <header>
+        <h1>Trip Cost Calculator</h1>
+        <p class="intro">Heading down the road to see family, or off on a trip you've been saving for? Find out what the drive will cost in fuel before you turn the key.</p>
+      </header>
+
+      <section class="card" aria-label="Trip details">
+        <div class="field">
+          <label class="field-label" for="distance">Trip distance <span class="sub">(one way, in miles)</span></label>
+          <div class="input-row">
+            <input type="number" id="distance" inputmode="decimal" min="0" step="any" placeholder="e.g. 250" autocomplete="off" />
+            <span class="suffix">miles</span>
+          </div>
+          <div class="chips" role="group" aria-label="Common distances">
+            <button type="button" class="chip" data-miles="50">50 mi</button>
+            <button type="button" class="chip" data-miles="100">100 mi</button>
+            <button type="button" class="chip" data-miles="250">250 mi</button>
+            <button type="button" class="chip" data-miles="500">500 mi</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="toggle-row">
+            <div class="toggle-text">
+              <span class="t-title">Round trip</span>
+              <span class="t-sub">Coming back home too — doubles the distance</span>
+            </div>
+            <span class="switch">
+              <input type="checkbox" id="roundtrip" aria-label="Round trip" />
+            </span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="mpg">Your car's fuel economy <span class="sub">(miles per gallon)</span></label>
+          <div class="input-row">
+            <input type="number" id="mpg" inputmode="decimal" min="0" step="any" placeholder="e.g. 30" autocomplete="off" />
+            <span class="suffix">MPG</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="price">Gas price <span class="sub">(per gallon)</span></label>
+          <div class="input-row">
+            <span class="prefix">$</span>
+            <input type="number" id="price" inputmode="decimal" min="0" step="any" placeholder="e.g. 3.25" autocomplete="off" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="people">Split the cost <span class="sub">(optional — how many people are sharing?)</span></label>
+          <div class="input-row">
+            <input type="number" id="people" inputmode="numeric" min="1" step="1" placeholder="Just me" autocomplete="off" />
+            <span class="suffix">people</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="results" aria-label="Results" aria-live="polite">
+        <div class="total-block">
+          <p class="total-label">Total fuel cost</p>
+          <p class="total-value" id="totalCost">—</p>
+          <p class="total-note" id="totalNote">Fill in the three numbers above to see your cost.</p>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat">
+            <p class="s-label">Gallons needed</p>
+            <p class="s-value" id="gallons">—</p>
+            <p class="s-note" id="gallonsNote">&nbsp;</p>
+          </div>
+          <div class="stat">
+            <p class="s-label">Cost per mile</p>
+            <p class="s-value" id="perMile">—</p>
+            <p class="s-note">fuel only</p>
+          </div>
+          <div class="stat" id="perPersonStat" style="grid-column: 1 / -1; display: none;">
+            <p class="s-label">Cost per person</p>
+            <p class="s-value" id="perPerson">—</p>
+            <p class="s-note" id="perPersonNote">&nbsp;</p>
+          </div>
+        </div>
+
+        <p class="hint" id="hint"></p>
+      </section>
+
+      <p class="footnote">All the math happens right here on your device — nothing you type is sent anywhere.</p>
+    </div>
+
+    <script>
+      (function () {
+        var distanceEl = document.getElementById("distance");
+        var mpgEl = document.getElementById("mpg");
+        var priceEl = document.getElementById("price");
+        var peopleEl = document.getElementById("people");
+        var roundtripEl = document.getElementById("roundtrip");
+
+        var totalCostEl = document.getElementById("totalCost");
+        var totalNoteEl = document.getElementById("totalNote");
+        var gallonsEl = document.getElementById("gallons");
+        var gallonsNoteEl = document.getElementById("gallonsNote");
+        var perMileEl = document.getElementById("perMile");
+        var perPersonStatEl = document.getElementById("perPersonStat");
+        var perPersonEl = document.getElementById("perPerson");
+        var perPersonNoteEl = document.getElementById("perPersonNote");
+        var hintEl = document.getElementById("hint");
+        var chips = document.querySelectorAll(".chip");
+
+        function num(el) {
+          var v = parseFloat(el.value);
+          return isNaN(v) ? null : v;
+        }
+        function money(v) {
+          return "$" + v.toFixed(2);
+        }
+        function fmtMiles(v) {
+          return (Math.round(v * 10) / 10).toLocaleString("en-US");
+        }
+
+        function update() {
+          var miles = num(distanceEl);
+          var mpg = num(mpgEl);
+          var price = num(priceEl);
+          var people = num(peopleEl);
+          var roundtrip = roundtripEl.checked;
+
+          // Mark the active distance chip, if any.
+          for (var i = 0; i < chips.length; i++) {
+            var chipMiles = parseFloat(chips[i].getAttribute("data-miles"));
+            if (miles !== null && chipMiles === miles) {
+              chips[i].classList.add("active");
+            } else {
+              chips[i].classList.remove("active");
+            }
+          }
+
+          var hints = [];
+
+          if (miles === null) {
+            hints.push("Start with how far you're driving — tap one of the common distances or type your own.");
+          } else if (miles <= 0) {
+            hints.push("A distance of zero means no driving at all — enter how many miles the trip is.");
+          }
+
+          if (mpg === null) {
+            hints.push("Add your car's MPG — it's often on the window sticker, or about 25–35 for most cars.");
+          } else if (mpg <= 0) {
+            hints.push("MPG can't be zero — even the thirstiest truck gets a few miles per gallon. Try your car's real number.");
+          }
+
+          if (price === null) {
+            hints.push("Add the gas price per gallon — check the sign at your usual station.");
+          } else if (price < 0) {
+            hints.push("A gas price below zero doesn't happen — enter the price per gallon as a positive number.");
+          }
+
+          var totalMiles = (miles !== null && miles > 0) ? miles * (roundtrip ? 2 : 1) : null;
+          var ready = totalMiles !== null && mpg !== null && mpg > 0 && price !== null && price >= 0;
+
+          if (ready) {
+            var gallons = totalMiles / mpg;
+            var total = gallons * price;
+            var perMile = price / mpg;
+
+            totalCostEl.textContent = money(total);
+            totalNoteEl.textContent = "for " + fmtMiles(totalMiles) + " miles" + (roundtrip ? " (round trip)" : " (one way)");
+            gallonsEl.textContent = (Math.round(gallons * 10) / 10).toLocaleString("en-US") + " gal";
+            gallonsNoteEl.textContent = "at " + mpg + " MPG";
+            perMileEl.textContent = money(perMile);
+          } else {
+            totalCostEl.textContent = "—";
+            totalNoteEl.textContent = "Fill in the three numbers above to see your cost.";
+            gallonsEl.textContent = "—";
+            gallonsNoteEl.innerHTML = "&nbsp;";
+            perMileEl.textContent = "—";
+          }
+
+          // Split cost
+          var showSplit = people !== null && people >= 2;
+          if (showSplit && ready) {
+            var perPerson = (totalMiles / mpg) * price / Math.floor(people);
+            perPersonStatEl.style.display = "";
+            perPersonEl.textContent = money(perPerson);
+            perPersonNoteEl.textContent = "split " + Math.floor(people) + " ways";
+          } else if (showSplit) {
+            perPersonStatEl.style.display = "";
+            perPersonEl.textContent = "—";
+            perPersonNoteEl.textContent = "once the trip numbers are in";
+          } else {
+            perPersonStatEl.style.display = "none";
+            if (people !== null && people === 1) {
+              hints.push("Splitting between 1 person is just you — leave it blank, or add 2 or more to share the cost.");
+            } else if (people !== null && people < 1) {
+              hints.push("The split needs at least 1 person — leave it blank if it's just you.");
+            }
+          }
+
+          if (hints.length > 0) {
+            hintEl.textContent = hints[0];
+            hintEl.classList.add("show");
+          } else {
+            hintEl.textContent = "";
+            hintEl.classList.remove("show");
+          }
+        }
+
+        var inputs = [distanceEl, mpgEl, priceEl, peopleEl];
+        for (var i = 0; i < inputs.length; i++) {
+          inputs[i].addEventListener("input", update);
+        }
+        roundtripEl.addEventListener("change", update);
+
+        for (var j = 0; j < chips.length; j++) {
+          chips[j].addEventListener("click", function () {
+            distanceEl.value = this.getAttribute("data-miles");
+            update();
+            distanceEl.focus();
+          });
+        }
+
+        update();
+      })();
+    </script>
+    <script data-goatcounter="https://jesuslovestyler.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+  </body>
+</html>
